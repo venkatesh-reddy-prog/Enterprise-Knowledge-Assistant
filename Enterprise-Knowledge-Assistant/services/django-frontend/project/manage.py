@@ -1,1 +1,0 @@
-print("Django placeholder running")
