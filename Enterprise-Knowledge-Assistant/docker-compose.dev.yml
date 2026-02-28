@@ -1,0 +1,90 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: eka-postgres
+    environment:
+      POSTGRES_DB: ekadb
+      POSTGRES_USER: ekauser
+      POSTGRES_PASSWORD: ekapassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ekauser -d ekadb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: eka-minio
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # Django is optional → keep disabled for clean logs
+  django-frontend:
+    build:
+      context: ./services/django-frontend
+      dockerfile: Dockerfile
+    container_name: eka-django
+    environment:
+      - POSTGRES_DB=ekadb
+      - POSTGRES_USER=ekauser
+      - POSTGRES_PASSWORD=ekapassword
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - DJANGO_SECRET_KEY=dev-secret
+      - DJANGO_DEBUG=true
+      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
+      - INGEST_SERVICE_URL=http://ingest-service:8200
+      - QUERY_SERVICE_URL=http://query-service:8100
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: echo "Django disabled for local dev"
+
+  ingest-service:
+    build:
+      context: ./services/fastapi-ingest
+      dockerfile: Dockerfile
+    container_name: eka-ingest
+    environment:
+      - USE_MOCK_PROVIDERS=true
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=100
+      - LOG_LEVEL=INFO
+    ports:
+      - "8200:8200"
+    volumes:
+      - ./services/fastapi-ingest/app:/app/app
+
+  query-service:
+    build:
+      context: ./services/fastapi-query
+      dockerfile: Dockerfile
+    container_name: eka-query
+    environment:
+      - USE_MOCK_PROVIDERS=true
+      - MAX_TOKENS=1000
+      - TEMPERATURE=0.7
+      - LOG_LEVEL=INFO
+    ports:
+      - "8100:8100"
+    volumes:
+      - ./services/fastapi-query/app:/app/app
+
+volumes:
+  postgres_data:
+  minio_data:

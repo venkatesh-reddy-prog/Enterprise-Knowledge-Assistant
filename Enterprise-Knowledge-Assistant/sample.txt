@@ -1,0 +1,1 @@
+Enterprise Knowledge Assistant enables semantic search across internal company documents using AI embeddings and vector databases. 
