@@ -75,7 +75,7 @@ def get_openai_client():
 
 def get_minio_client():
     if use_mock():
-        return _MockMinIO()
+        return "stored_locally"
     from minio import Minio
     return Minio(
         os.getenv("MINIO_ENDPOINT", "minio:9000"),
