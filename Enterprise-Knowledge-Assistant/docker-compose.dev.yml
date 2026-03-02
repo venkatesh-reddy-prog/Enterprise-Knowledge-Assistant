@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -31,21 +29,14 @@ services:
     volumes:
       - minio_data:/data
 
-  # Django is optional → keep disabled for clean logs
   django-frontend:
     build:
-      context: ./services/django-frontend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/django-frontend/Dockerfile
     container_name: eka-django
+    env_file: .env
     environment:
-      - POSTGRES_DB=ekadb
-      - POSTGRES_USER=ekauser
-      - POSTGRES_PASSWORD=ekapassword
       - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
-      - DJANGO_SECRET_KEY=dev-secret
-      - DJANGO_DEBUG=true
-      - DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1
       - INGEST_SERVICE_URL=http://ingest-service:8200
       - QUERY_SERVICE_URL=http://query-service:8100
     ports:
@@ -53,37 +44,34 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    command: echo "Django disabled for local dev"
+    volumes:
+      - ./services/django-frontend/project:/app/project
 
   ingest-service:
     build:
-      context: ./services/fastapi-ingest
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/fastapi-ingest/Dockerfile
     container_name: eka-ingest
-    environment:
-      - USE_MOCK_PROVIDERS=true
-      - CHUNK_SIZE=1000
-      - CHUNK_OVERLAP=100
-      - LOG_LEVEL=INFO
+    env_file: .env
     ports:
       - "8200:8200"
     volumes:
       - ./services/fastapi-ingest/app:/app/app
+      - ./services/shared:/app/services/shared
+    depends_on:
+      - minio
 
   query-service:
     build:
-      context: ./services/fastapi-query
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: services/fastapi-query/Dockerfile
     container_name: eka-query
-    environment:
-      - USE_MOCK_PROVIDERS=true
-      - MAX_TOKENS=1000
-      - TEMPERATURE=0.7
-      - LOG_LEVEL=INFO
+    env_file: .env
     ports:
       - "8100:8100"
     volumes:
       - ./services/fastapi-query/app:/app/app
+      - ./services/shared:/app/services/shared
 
 volumes:
   postgres_data:
