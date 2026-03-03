@@ -22,7 +22,7 @@ This system enables **semantic retrieval + grounded AI responses**, ensuring acc
 
 ## 🏛 High-Level Architecture
 
-![Enterprise_Knowledge_Assistant_Architecture](docs/Enterprise_Knowledge_Assistant_Architecture.png)
+![Enterprise Architecture](Enterprise-Knowledge-Assistant/docs/Enterprise_Knowledge_Assistant_Architecture.png)
 
 ---
 
