@@ -23,19 +23,7 @@ This system enables **semantic retrieval + grounded AI responses**, ensuring acc
 ## 🏛 High-Level Architecture
 
 ```
-User Query
-    ↓
-React Frontend
-    ↓
-Spring Boot Query Service
-    ↓
-Vector Similarity Search (Pinecone)
-    ↓
-Top-K Context Retrieval
-    ↓
-LLM Response Generation (OpenAI - RAG)
-    ↓
-Grounded AI Response
+![Enterprise_Knowledge_Assistant_Architecture](docs/screenshots/Enterprise_Knowledge_Assistant_Architecture.png)
 ```
 
 ---
