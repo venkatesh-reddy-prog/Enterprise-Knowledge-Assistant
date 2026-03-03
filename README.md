@@ -1,26 +1,28 @@
-🧠 Enterprise Knowledge Assistant
-AI-Powered Semantic Search & Knowledge Retrieval Platform
+# 🧠 Enterprise Knowledge Assistant  
+### AI-Powered Semantic Search & Knowledge Retrieval Platform
 
 Enterprise Knowledge Assistant is a scalable AI platform that enables organizations to perform intelligent, context-aware search across internal documents using vector embeddings and Retrieval-Augmented Generation (RAG).
 
 Built to simulate a production-grade internal knowledge system used in modern enterprises.
 
-🌍 What Problem Does It Solve?
+---
 
-Traditional search systems rely on keyword matching.
-They fail when:
+## 🌍 Problem Statement
 
-Documents are unstructured
+Traditional keyword-based search systems fail when:
 
-Queries are semantic in nature
+- Documents are unstructured
+- Queries require contextual understanding
+- Knowledge bases scale rapidly
+- Users expect natural language answers instead of document links
 
-Large knowledge bases grow rapidly
+This system enables **semantic retrieval + grounded AI responses**, ensuring accurate and explainable answers from enterprise data.
 
-Users expect natural-language answers instead of document links
+---
 
-This system enables semantic retrieval + grounded AI responses, ensuring relevant and explainable answers from enterprise data.
+## 🏛 High-Level Architecture
 
-🏛 System Architecture Overview
+```
 User Query
     ↓
 React Frontend
@@ -29,213 +31,169 @@ Spring Boot Query Service
     ↓
 Vector Similarity Search (Pinecone)
     ↓
-Context Retrieval (Top-K Chunks)
+Top-K Context Retrieval
     ↓
-LLM Response Generation (OpenAI)
+LLM Response Generation (OpenAI - RAG)
     ↓
-Grounded AI Answer
-🧩 Core Capabilities
-📄 Intelligent Document Ingestion
+Grounded AI Response
+```
 
-Upload internal documents (PDF / text-based)
+---
 
-Automatic chunking strategy
+## 📌 Core Features
 
-Embedding generation using OpenAI
+- 📂 Document ingestion & automatic chunking
+- 🧠 Embedding generation using OpenAI
+- 🔎 Semantic vector similarity search with Pinecone
+- 🤖 Retrieval-Augmented Generation (RAG)
+- ⚡ Low-latency query processing
+- 🧩 Microservices-based architecture
+- 🐳 Docker containerized deployment
+- 🌐 Full-stack implementation
 
-Vector storage in Pinecone
+---
 
-Metadata persistence in PostgreSQL
+## 🏗 Tech Stack
 
-🔎 Semantic Query Processing
+### Backend Services
+- Java (Spring Boot)
+- Python (FastAPI)
+- REST APIs
+- Maven
 
-Converts user query into embeddings
+### AI & Vector Infrastructure
+- OpenAI API (Embeddings + LLM)
+- Pinecone (Vector Database)
+- RAG Architecture
 
-Retrieves top-K semantically relevant chunks
+### Data Layer
+- PostgreSQL (Metadata storage)
+- Pinecone (Vector index)
 
-Injects context into LLM prompt
+### Frontend
+- React.js
 
-Produces grounded, enterprise-aware responses
+### DevOps
+- Docker
+- Environment-based configuration
+- CI/CD-ready architecture
 
-⚡ Scalable Microservices Design
+---
 
-Dedicated ingestion pipeline (FastAPI)
+## 🔁 Query Execution Flow
 
-Independent query service (Spring Boot)
+1. User submits a natural language question  
+2. Backend generates query embedding  
+3. Pinecone retrieves top-K relevant document chunks  
+4. Retrieved context is injected into LLM prompt  
+5. LLM generates a grounded response  
+6. Answer returned to frontend  
 
-Stateless architecture
+This reduces hallucinations and ensures responses are based on enterprise data.
 
-Easily horizontally scalable
+---
 
-🛠 Technology Stack
-Backend Services
+## 📂 Project Structure
 
-Java – Spring Boot (Query APIs)
-
-Python – FastAPI (Ingestion Service)
-
-RESTful Microservices Architecture
-
-AI & Vector Infrastructure
-
-OpenAI API (Embeddings + LLM)
-
-Pinecone (Vector Database)
-
-RAG (Retrieval-Augmented Generation)
-
-Data Layer
-
-PostgreSQL (Metadata & Logs)
-
-Pinecone (Embeddings Index)
-
-Frontend
-
-React.js (User Interface)
-
-DevOps
-
-Docker (Containerization)
-
-Environment-based configuration
-
-CI/CD-ready service structure
-
-🔁 How a Query Works (End-to-End Flow)
-
-User submits a natural language question
-
-Backend generates embedding for the query
-
-Pinecone retrieves semantically similar document chunks
-
-Retrieved context is injected into the LLM prompt
-
-OpenAI generates a grounded response
-
-Answer is returned to the frontend
-
-This minimizes hallucinations and ensures responses are based on company data.
-
-📦 Repository Structure
+```
 enterprise-knowledge-assistant/
  ├── frontend/
  │   ├── src/
- │   ├── components/
  │   └── package.json
  │
  ├── services/
- │   ├── query-service/ (Spring Boot)
- │   ├── ingestion-service/ (FastAPI)
+ │   ├── query-service/        (Spring Boot)
+ │   ├── ingestion-service/    (FastAPI)
  │   └── shared/
  │
  ├── docker-compose.yml
  └── README.md
-🚀 Running Locally
-1️⃣ Clone Repository
+```
+
+---
+
+## 🚀 Running Locally
+
+### 1️⃣ Clone Repository
+
+```bash
 git clone https://github.com/venkatesh-reddy-prog/enterprise-knowledge-assistant.git
 cd enterprise-knowledge-assistant
-2️⃣ Configure Environment Variables
+```
 
-Create .env file:
+### 2️⃣ Configure Environment Variables
 
+Create a `.env` file:
+
+```env
 OPENAI_API_KEY=your_key
 PINECONE_API_KEY=your_key
 PINECONE_ENV=your_env
 PINECONE_INDEX=your_index
-3️⃣ Start Services
+```
+
+### 3️⃣ Start Services
+
+```bash
 docker-compose up --build
+```
 
-Or run individual services via:
+Or run services individually:
+- Spring Boot (Query Service)
+- FastAPI (Ingestion Service)
+- React Frontend
 
-Spring Boot
+---
 
-FastAPI
+## 🔐 Security & Configuration
 
-React
+- Secure API key management via environment variables
+- Modular service separation
+- Independent ingestion & query pipelines
+- Scalable stateless microservices
 
-🔐 Security & Configuration
+---
 
-Secure API key handling via environment variables
+## 📈 Design Considerations
 
-Modular configuration for model upgrades
+- Efficient document chunking strategy
+- Asynchronous ingestion pipeline
+- Optimized embedding storage
+- Low-latency similarity retrieval
+- Containerized multi-service architecture
 
-Separation of ingestion & query pipelines
+---
 
-Production-ready service layering
+## 🎯 Use Cases
 
-📈 Performance & Design Considerations
+- Internal enterprise knowledge search
+- HR policy assistant
+- Engineering documentation retrieval
+- Legal document semantic search
+- Procurement & compliance intelligence
 
-Efficient chunking strategy for embedding optimization
+---
 
-Asynchronous ingestion pipeline
+## 🧠 Key Concepts Demonstrated
 
-Low-latency vector similarity search
+- Distributed Microservices Architecture
+- Retrieval-Augmented Generation (RAG)
+- Vector Databases & Embeddings
+- REST API Design
+- AI + Backend Integration
+- Dockerized Deployment
+- Enterprise System Design
 
-Stateless backend services
+---
 
-Containerized multi-service architecture
+## 👨‍💻 Author
 
-🎯 Ideal Use Cases
+**B. Venkatesh Reddy**  
+Backend & AI Systems Engineer  
+GitHub: https://github.com/venkatesh-reddy-prog  
 
-Internal knowledge base search
+---
 
-HR policy assistant
+## ⭐ Support
 
-Engineering documentation retrieval
-
-Legal document search
-
-Procurement intelligence systems
-
-🧪 Challenges Solved
-
-Embedding consistency across large documents
-
-Vector index optimization
-
-Prompt engineering for grounded responses
-
-Managing async ingestion vs real-time querying
-
-Environment configuration across multi-service deployment
-
-🏗 Deployment Model
-React Frontend
-      ↓
-Spring Boot Query Service
-      ↓
-FastAPI Ingestion Service
-      ↓
-Pinecone Vector Database
-      ↓
-OpenAI API
-
-Fully containerized for cloud deployment (Render / AWS / GCP ready).
-
-🧠 Concepts Demonstrated
-
-Distributed Microservices Architecture
-
-Retrieval-Augmented Generation (RAG)
-
-Vector Databases & Embeddings
-
-REST API Design
-
-AI + Backend Integration
-
-Containerized Deployment
-
-Scalable Enterprise System Design
-
-👨‍💻 Author
-
-B. Venkatesh Reddy
-Backend & AI Systems Engineer
-GitHub: https://github.com/venkatesh-reddy-prog
-
-⭐ Support
-
-If you found this project useful or interesting, consider giving it a ⭐ on GitHub.
+If you found this project useful, consider giving it a ⭐ on GitHub.
