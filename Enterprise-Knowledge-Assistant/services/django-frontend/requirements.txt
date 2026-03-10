@@ -1,4 +1,4 @@
 Django==4.2.11
-psycopg2[binary]
+psycopg2-binary==2.9.11
 requests==2.31.0
 python-dotenv==1.0.1
