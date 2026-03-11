@@ -1,75 +1,87 @@
 import os
+import httpx
 from typing import Any
 
-from app.utils import get_openai_client, get_pinecone_index, use_mock
+from app.utils import get_pinecone_index, ollama_chat, use_mock
 
-TOP_K = int(os.getenv("TOP_K", 3))
-MAX_TOKENS = int(os.getenv("MAX_TOKENS", 1000))
-TEMPERATURE = float(os.getenv("TEMPERATURE", 0.7))
-LLM_MODEL = os.getenv("OPENAI_MODEL", "gpt-4")
-EMBEDDING_MODEL = os.getenv("OPENAI_EMBEDDING_MODEL", "text-embedding-3-small")
+TOP_K = int(os.getenv("TOP_K", 5))
 
-SYSTEM_PROMPT = """You are an enterprise knowledge assistant. Answer the user's question using ONLY the
-provided context passages. If the context does not contain enough information, say so clearly.
-Always cite the source document filenames when you use them."""
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434")
+OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
 
-QA_PROMPT = """Context passages:
-{context}
+SYSTEM_PROMPT = """You are an enterprise knowledge assistant.
 
-Question: {question}
+Use the provided context to answer the question.
 
-Answer:"""
+Rules:
+- Only answer using the context.
+- If the context does not contain the answer say "I don't know".
+"""
 
 
 def embed_question(question: str) -> list[float]:
     if use_mock():
-        return [0.0] * 1536
-    client = get_openai_client()
-    response = client.embeddings.create(model=EMBEDDING_MODEL, input=[question])
-    return response.data[0].embedding
+        return [0.0] * 768
+
+    response = httpx.post(
+        f"{OLLAMA_BASE_URL}/api/embeddings",
+        json={
+            "model": OLLAMA_EMBED_MODEL,
+            "prompt": question,
+        },
+        timeout=60,
+    )
+
+    response.raise_for_status()
+    return response.json()["embedding"]
 
 
 def retrieve_chunks(question_vector: list[float], tenant_id: str) -> list[dict]:
     index = get_pinecone_index(tenant_id)
+
     results = index.query(vector=question_vector, top_k=TOP_K, include_metadata=True)
-    matches = getattr(results, "matches", results.get("matches", []))
+
+    matches = getattr(results, "matches", [])
+
     return [
         {
-            "text": m.get("metadata", {}).get("text", "") if isinstance(m, dict) else m.metadata.get("text", ""),
-            "filename": m.get("metadata", {}).get("filename", "unknown") if isinstance(m, dict) else m.metadata.get("filename", "unknown"),
-            "score": m.get("score", 0) if isinstance(m, dict) else m.score,
+            "text": m.metadata.get("text", ""),
+            "filename": m.metadata.get("filename", "unknown"),
+            "score": m.score,
         }
         for m in matches
     ]
 
 
 def generate_answer(question: str, chunks: list[dict]) -> str:
-    if use_mock():
-        if chunks:
-            excerpts = " | ".join(c["text"][:100] for c in chunks)
-            return f"[Mock answer] Based on your documents: {excerpts}..."
-        return "[Mock answer] No relevant documents found for your question."
-
-    client = get_openai_client()
-    context = "\n\n".join(f"[Source: {c['filename']}]\n{c['text']}" for c in chunks)
-    response = client.chat.completions.create(
-        model=LLM_MODEL,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": QA_PROMPT.format(context=context, question=question)},
-        ],
-        max_tokens=MAX_TOKENS,
-        temperature=TEMPERATURE,
+    context = "\n\n".join(
+        f"[Source: {c['filename']}]\n{c['text']}" for c in chunks
     )
-    return response.choices[0].message.content
+
+    prompt = f"""{SYSTEM_PROMPT}
+
+Context:
+{context}
+
+Question:
+{question}
+
+Answer:
+"""
+
+    return ollama_chat(prompt)
 
 
 async def answer_question(question: str, tenant_id: str) -> dict[str, Any]:
     question_vector = embed_question(question)
+
     chunks = retrieve_chunks(question_vector, tenant_id)
+
     answer = generate_answer(question, chunks)
+
     sources = [
         {"filename": c["filename"], "excerpt": c["text"][:200], "score": round(c["score"], 4)}
         for c in chunks
     ]
+
     return {"answer": answer, "sources": sources}
